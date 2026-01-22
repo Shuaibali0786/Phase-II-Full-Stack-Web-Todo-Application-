@@ -1,55 +1,48 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report for Constitution Update
+Version change: N/A → 1.0.0 (Initial constitution)
+Modified principles: N/A (Initial creation)
+Added sections: Core Principles (6 principles), AI Integration, Reliability & Scalability, Governance
+Removed sections: None
+Templates requiring updates:
+- ✅ .specify/templates/plan-template.md (needs review for constitution alignment)
+- ✅ .specify/templates/spec-template.md (needs review for constitution alignment)
+- ✅ .specify/templates/tasks-template.md (needs review for constitution alignment)
+- ⚠ .specify/templates/commands/*.md (pending review for outdated references)
+Follow-up TODOs:
+- Review and update templates to align with new constitution principles
+- Ensure all future development follows spec-driven development approach
+-->
+
+# Hackathon Phase II – Evolution of Todo: Mastering Spec-Driven Development & Cloud-Native AI Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven Development
+All features must be implemented strictly via specifications; no manual coding allowed. Refine Specs until Claude Code generates correct output. This principle ensures consistency, maintainability, and adherence to the project's architectural vision.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Reusable Intelligence
+Build agent skills, subagents, and modular components for easy extension across phases. This principle promotes code reusability, reduces duplication, and enables efficient scaling of AI capabilities throughout the project lifecycle.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Security & Authentication
+Implement JWT-based authentication using Better Auth to isolate users and protect API endpoints. Security is paramount - all user data must be properly isolated and all API endpoints must be protected with appropriate authentication mechanisms.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Full-Stack Accuracy
+Ensure seamless integration between Next.js frontend, FastAPI backend, SQLModel ORM, and Neon Serverless PostgreSQL. All components must work together harmoniously with clear contracts and well-defined interfaces.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Cloud-Native Deployment
+Leverage Docker, Kubernetes, Minikube, Helm Charts, and cloud deployment on DigitalOcean Kubernetes (DOKS). The application must be designed for cloud-native environments from the ground up, ensuring scalability and portability.
 
-### [PRINCIPLE_6_NAME]
+### VI. User Experience
+Frontend must be responsive, colorful, intuitive, and guide users efficiently through task management and AI chatbot interaction. User experience is critical for adoption and must be prioritized throughout development.
 
+## AI Integration
+From Phases III-V, implement conversational AI using OpenAI Chatkit, OpenAI Agents SDK, and Official MCP SDK for natural language Todo management. AI integration must be seamless, intuitive, and provide real value to users.
 
-[PRINCIPLE__DESCRIPTION]
-
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
-
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Reliability & Scalability
+Database operations, API endpoints, and AI agent interactions must be robust and performant. The system must handle expected load efficiently and gracefully degrade under unexpected conditions.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This Constitution supersedes all other practices and guidelines. All project contributors must comply with these principles. Amendments require proper documentation, architectural review, and migration planning. Complexity must be justified and aligned with project goals.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-01-11 | **Last Amended**: 2026-01-11

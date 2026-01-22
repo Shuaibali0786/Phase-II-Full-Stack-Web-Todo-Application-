@@ -1,0 +1,770 @@
+openapi: 3.0.3
+info:
+  title: Todo Application API
+  description: API for the Evolution of Todo application
+  version: 1.0.0
+  contact:
+    name: Todo Application Support
+    email: support@todo-app.example.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: https://api.todo-app.example.com/api/v1
+    description: Production server
+
+tags:
+  - name: auth
+    description: Authentication operations
+  - name: tasks
+    description: Operations about tasks
+  - name: users
+    description: Operations about users
+  - name: priorities
+    description: Operations about task priorities
+  - name: tags
+    description: Operations about task tags
+  - name: ai
+    description: AI chatbot operations
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login a user
+      description: Authenticates a user and returns JWT tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+        '422':
+          description: Validation error
+
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register a new user
+      description: Creates a new user account. On success, returns tokens but frontend should redirect to login page (no auto-login per spec).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created successfully. Returns tokens but frontend should redirect to login.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '409':
+          description: User with this email already exists
+        '422':
+          description: Validation error
+        '500':
+          description: Internal Server Error (generic - does not expose database details)
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logout user
+      description: Logs out the current user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+
+  /tasks:
+    get:
+      tags:
+        - tasks
+      summary: Get user's tasks
+      description: Retrieve all tasks for the authenticated user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: completed
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filter by completion status
+        - name: priority
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by priority ID
+        - name: tag
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by tag ID
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [created_at, due_date, priority]
+          description: Sort by field
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+          description: Number of tasks to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Number of tasks to skip
+      responses:
+        '200':
+          description: List of user's tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskResponse'
+                  total:
+                    type: integer
+                  offset:
+                    type: integer
+                  limit:
+                    type: integer
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - tasks
+      summary: Create a new task
+      description: Create a new task for the authenticated user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+
+  /tasks/{id}:
+    get:
+      tags:
+        - tasks
+      summary: Get a specific task
+      description: Retrieve a specific task by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+    put:
+      tags:
+        - tasks
+      summary: Update a task
+      description: Update an existing task
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+        '422':
+          description: Validation error
+    delete:
+      tags:
+        - tasks
+      summary: Delete a task
+      description: Delete a specific task
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+
+  /tasks/{id}/complete:
+    patch:
+      tags:
+        - tasks
+      summary: Toggle task completion
+      description: Mark a task as complete or incomplete
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_completed:
+                  type: boolean
+                  description: New completion status
+              required:
+                - is_completed
+      responses:
+        '200':
+          description: Task completion status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+        '422':
+          description: Validation error
+
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: Get current user info
+      description: Retrieve information about the authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - users
+      summary: Update current user info
+      description: Update information about the authenticated user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+
+  /priorities:
+    get:
+      tags:
+        - priorities
+      summary: Get available priorities
+      description: Retrieve all available priority levels
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of priorities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PriorityResponse'
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - priorities
+      summary: Create a new priority
+      description: Create a custom priority level (admin only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePriorityRequest'
+      responses:
+        '201':
+          description: Priority created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriorityResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Validation error
+
+  /tags:
+    get:
+      tags:
+        - tags
+      summary: Get user's tags
+      description: Retrieve all tags for the authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of user's tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagResponse'
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - tags
+      summary: Create a new tag
+      description: Create a new tag for the authenticated user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+
+  /ai/chat:
+    post:
+      tags:
+        - ai
+      summary: Send message to AI assistant
+      description: Send a message to the AI assistant for natural language todo management
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIMessageRequest'
+      responses:
+        '200':
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIMessageResponse'
+        '401':
+          description: Unauthorized
+        '422':
+          description: Validation error
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required:
+        - email
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          default: bearer
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+        first_name:
+          type: string
+        last_name:
+          type: string
+      required:
+        - email
+        - password
+
+    RegisterResponse:
+      type: object
+      description: Registration response - tokens returned but NOT stored by frontend (redirect to login instead)
+      properties:
+        access_token:
+          type: string
+          description: JWT access token (frontend should NOT store - redirect to login)
+        refresh_token:
+          type: string
+          description: JWT refresh token (frontend should NOT store - redirect to login)
+        token_type:
+          type: string
+          default: bearer
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        is_completed:
+          type: boolean
+        priority:
+          $ref: '#/components/schemas/PriorityResponse'
+        user_id:
+          type: string
+          format: uuid
+        due_date:
+          type: string
+          format: date-time
+        reminder_time:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagResponse'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        priority_id:
+          type: string
+          format: uuid
+        due_date:
+          type: string
+          format: date-time
+        reminder_time:
+          type: string
+          format: date-time
+        tag_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - title
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        priority_id:
+          type: string
+          format: uuid
+        due_date:
+          type: string
+          format: date-time
+        reminder_time:
+          type: string
+          format: date-time
+        tag_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        is_completed:
+          type: boolean
+
+    PriorityResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        value:
+          type: integer
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreatePriorityRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+        value:
+          type: integer
+          minimum: 1
+          maximum: 10
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+      required:
+        - name
+        - value
+        - color
+
+    TagResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        user_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+      required:
+        - name
+        - color
+
+    AIMessageRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        context:
+          type: object
+          description: Additional context for the AI
+      required:
+        - message
+
+    AIMessageResponse:
+      type: object
+      properties:
+        response:
+          type: string
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              action_type:
+                type: string
+                enum: [create_task, update_task, delete_task, mark_complete]
+              task_data:
+                $ref: '#/components/schemas/CreateTaskRequest'
+              task_id:
+                type: string
+                format: uuid
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+externalDocs:
+  description: Find out more about the Todo Application
+  url: https://todo-app.example.com/documentation
