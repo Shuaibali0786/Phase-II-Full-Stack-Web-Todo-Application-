@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 // Create an axios instance with default configuration
 const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-  timeout: 10000,
+  timeout: 30000, // Increased timeout to 30 seconds to prevent premature timeouts
   headers: {
     'Content-Type': 'application/json',
   },

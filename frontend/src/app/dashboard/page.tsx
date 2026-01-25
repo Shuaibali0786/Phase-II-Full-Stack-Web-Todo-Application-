@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, LogOut } from 'lucide-react';
+import { Plus, LogOut, ListOrdered } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { Task, Priority, Tag, CreateTaskRequest, UpdateTaskRequest } from '@/types';
 import { TaskFormModal } from '@/app/components/TaskForm/TaskFormModal';
 import { DeleteConfirmationModal } from '@/app/components/common/DeleteConfirmationModal';
+import { ViewAllTasksModal } from '@/app/components/common/ViewAllTasksModal';
 import { TaskTable } from '@/app/components/TaskTable';
 import { Button } from '@/app/components/ui/Button';
 import { Logo } from '@/app/components/Auth/Logo';
@@ -26,6 +27,10 @@ const DashboardPage: React.FC = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
+  const [showViewAllModal, setShowViewAllModal] = useState(false);
+
+  // Refresh trigger for TaskTable
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Fetch priorities and tags for modals
   const fetchMetadata = useCallback(async () => {
@@ -54,6 +59,7 @@ const DashboardPage: React.FC = () => {
     try {
       await taskApi.deleteTask(deletingTask.id);
       setDeletingTask(null);
+      setRefreshTrigger((prev) => prev + 1); // Refresh task list
     } catch (error) {
       console.error('Failed to delete task:', error);
     }
@@ -68,7 +74,7 @@ const DashboardPage: React.FC = () => {
       }
       setEditingTask(null);
       setShowTaskModal(false);
-      // TaskTable will refresh automatically via its own fetch mechanism
+      setRefreshTrigger((prev) => prev + 1); // Refresh task list immediately
     } catch (error) {
       console.error('Failed to save task:', error);
       throw error; // Let modal handle the error
@@ -143,6 +149,14 @@ const DashboardPage: React.FC = () => {
 
             <div className="flex items-center gap-3">
               <Button
+                variant="secondary"
+                leftIcon={<ListOrdered className="w-4 h-4" />}
+                onClick={() => setShowViewAllModal(true)}
+                className="hidden sm:flex"
+              >
+                View All
+              </Button>
+              <Button
                 variant="primary"
                 leftIcon={<Plus className="w-4 h-4" />}
                 onClick={() => {
@@ -179,6 +193,7 @@ const DashboardPage: React.FC = () => {
               onTaskUpdated={() => {
                 // TaskTable handles its own refresh after completion toggle
               }}
+              refreshTrigger={refreshTrigger}
             />
           </motion.section>
         </motion.div>
@@ -205,6 +220,12 @@ const DashboardPage: React.FC = () => {
         title="Delete Task"
         message="Are you sure you want to delete this task? This action cannot be undone."
         itemName={deletingTask?.title}
+      />
+
+      {/* View All Tasks Modal */}
+      <ViewAllTasksModal
+        isOpen={showViewAllModal}
+        onClose={() => setShowViewAllModal(false)}
       />
     </div>
   );

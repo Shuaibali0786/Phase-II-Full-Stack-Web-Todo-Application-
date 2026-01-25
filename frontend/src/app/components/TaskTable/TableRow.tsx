@@ -138,8 +138,9 @@ export default function TableRow({ task, onToggleComplete, onEdit, onDelete }: T
         <div className="flex items-center gap-2">
           <button
             onClick={() => onEdit(task)}
-            className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-colors"
+            className="p-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 hover:text-yellow-300 transition-colors"
             aria-label={`Edit task "${task.title}"`}
+            title="Update task"
           >
             <Pencil className="w-4 h-4" />
           </button>
@@ -147,6 +148,7 @@ export default function TableRow({ task, onToggleComplete, onEdit, onDelete }: T
             onClick={() => onDelete(task)}
             className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
             aria-label={`Delete task "${task.title}"`}
+            title="Delete task"
           >
             <Trash2 className="w-4 h-4" />
           </button>

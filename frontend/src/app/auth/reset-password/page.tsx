@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
@@ -11,7 +11,27 @@ import { Logo } from '@/app/components/Auth/Logo';
 import { fadeInUp, staggerContainer } from '@/lib/animations';
 import { authApi } from '@/utils/api';
 
-const ResetPasswordPage: React.FC = () => {
+// Loading skeleton for Suspense boundary (required for useSearchParams in Next.js 15)
+const ResetPasswordSkeleton = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="w-full max-w-md animate-pulse">
+      <div className="mb-8 text-center">
+        <Logo size="lg" />
+      </div>
+      <div className="auth-card">
+        <div className="h-8 bg-surface rounded mb-6 mx-auto w-48" />
+        <div className="space-y-4">
+          <div className="h-12 bg-surface rounded" />
+          <div className="h-12 bg-surface rounded" />
+          <div className="h-10 bg-surface rounded" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Inner component that uses useSearchParams
+const ResetPasswordContent: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -213,6 +233,15 @@ const ResetPasswordPage: React.FC = () => {
         </motion.p>
       </motion.div>
     </div>
+  );
+};
+
+// Main page component with Suspense boundary
+const ResetPasswordPage: React.FC = () => {
+  return (
+    <Suspense fallback={<ResetPasswordSkeleton />}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 };
 

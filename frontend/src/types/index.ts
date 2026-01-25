@@ -128,7 +128,7 @@ export interface TaskListResponse {
 export interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: RegisterRequest) => Promise<void>;
+  register: (userData: RegisterRequest) => Promise<{ success: boolean }>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;

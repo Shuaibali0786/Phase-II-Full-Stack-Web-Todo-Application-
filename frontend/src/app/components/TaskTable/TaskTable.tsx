@@ -9,7 +9,7 @@ import TableHeader from './TableHeader';
 import TableRow from './TableRow';
 import PaginationControls from './PaginationControls';
 
-export default function TaskTable({ onAddTask, onEditTask, onDeleteTask, onTaskUpdated }: TaskTableProps) {
+export default function TaskTable({ onAddTask, onEditTask, onDeleteTask, onTaskUpdated, refreshTrigger }: TaskTableProps) {
   // State
   const [tasks, setTasks] = useState<Task[]>([]);
   const [totalTasks, setTotalTasks] = useState(0);
@@ -71,10 +71,10 @@ export default function TaskTable({ onAddTask, onEditTask, onDeleteTask, onTaskU
     }
   };
 
-  // Fetch tasks on mount and when pagination/sort changes
+  // Fetch tasks on mount, when pagination/sort changes, or when refreshTrigger changes
   useEffect(() => {
     fetchTasks();
-  }, [currentPage, pageSize, sortConfig]);
+  }, [currentPage, pageSize, sortConfig, refreshTrigger]);
 
   // Handle sort
   const handleSort = (column: SortColumn) => {

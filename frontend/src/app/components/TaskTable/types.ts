@@ -24,6 +24,7 @@ export interface TaskTableProps {
   onEditTask?: (task: Task) => void;  // Callback when Edit button clicked
   onDeleteTask?: (task: Task) => void;  // Callback when Delete button clicked
   onTaskUpdated?: () => void;  // Callback after task changes (e.g., completion toggle)
+  refreshTrigger?: number;  // Increment to trigger a task list refresh
 }
 
 // TableHeader props

@@ -48,13 +48,16 @@ The application will include core entities with defined relationships:
 ## User Experience & Error Handling
 - Primary user journey: Focus on core CRUD operations for tasks (create, read, update, delete) with completion toggling as primary flow
 - Dashboard display: Professional task management dashboard showing actual tasks in a list or table format directly on the main dashboard page
+- Dashboard navbar: Minimal clean layout with Logo (left), "Add Task" button (center for visual focus), Logout button (far right), no user identification or welcome text displayed
 - Core dashboard features: Add New Task (button opens animated modal with full form), View All Tasks (data table), Update Task, Delete Task, Complete/Uncomplete Task (checkbox toggle)
-- Add task interaction: "Add Task" button prominently placed, opens animated modal with TaskFormModal for creating new tasks
+- Add task interaction: "Add Task" button prominently placed in center of navbar, opens fade-in modal (TaskFormModal) for creating new tasks
 - Edit task interaction: Edit icon button in each table row opens TaskFormModal pre-populated with task data for updating
-- Delete task interaction: Delete icon button in each table row opens DeleteConfirmationModal with confirmation step before deletion
+- Delete task interaction: Delete icon button in each table row opens DeleteConfirmationModal with fade-in animation and confirmation step before deletion
 - Complete task interaction: Checkbox in leftmost table column allows instant one-click toggle of completion status with visual feedback (strikethrough, color change)
 - Dashboard interaction: All CRUD operations accessible directly from the dashboard without navigation to separate pages
 - Task display format: Data table with sortable columns (Checkbox, Title, Status, Priority, Due Date, Actions) - professional structured layout for task management
+- Table row interactions: Rows have subtle background color change on hover (no scale or shadow effects) for clean, minimal feedback
+- Button interactions: Minimal hover animations - color changes only, no scale or shadow effects for professional productivity focus
 - Pagination: Display 25 tasks per page by default with pagination controls (prev/next, page numbers), allow users to change page size (10/25/50/100 options)
 - Loading states: Implement standard loading spinners during API requests
 - Empty states: Show empty state illustrations when no tasks exist
@@ -68,11 +71,13 @@ The application will include core entities with defined relationships:
 - **Application Name**: TaskFlow - displayed prominently with gradient styling on auth pages
 - **Design Theme**: Dark theme with orange/yellow accent colors, glassmorphism effects, rounded cards, soft shadows
 - **Animation Library**: Framer Motion for all micro-interactions, page transitions, and card animations
+- **Animation Approach**: Minimal animations for professional productivity focus - hover color changes only, no scale/shadow effects on buttons
 - **Icon Library**: Lucide React for consistent, lightweight SVG icons throughout the UI
+- **Dashboard Navbar Layout**: Logo (left), Add Task button (center), Logout button (far right) - centered primary action for visual focus, no user identification displayed
 - **Dashboard Stats**: Four stat cards (Total Tasks, Completed, In Progress, Overdue) with animated counters and colored icon circles
 - **Overdue Logic**: Task is overdue when due_date has passed AND is_completed is false
-- **Task Cards**: Card-based layout (no tables), rounded corners, shadow effects, icon-based actions
-- **Modals**: Custom animated modals for task creation/editing and delete confirmations, dark themed with orange accents
+- **Task Table Row Hover**: Background tint only - subtle background color change without scale or shadow effects
+- **Modals**: Custom animated modals for task creation/editing and delete confirmations using fade-only transitions (simple opacity, no movement), dark themed with orange accents
 - **Password Validation**: Live validation indicators showing rules (8+ chars, uppercase, lowercase, digit, special char)
 - **Responsive Design**: Mobile-first approach, fully responsive from mobile to desktop
 
@@ -128,3 +133,10 @@ The application will include core entities with defined relationships:
 - Q: How should users edit or delete tasks directly from the table rows? → A: Row action buttons + Modals - Each row has Edit/Delete icon buttons, Edit opens TaskFormModal, Delete opens DeleteConfirmationModal
 - Q: How should users mark tasks as complete or incomplete from the table? → A: Checkbox column - Leftmost column with checkbox for instant one-click toggle with visual feedback
 - Q: How should the dashboard handle users with many tasks (50+, 100+, or more)? → A: Pagination with page size options - Show 25 tasks per page by default, allow users to change page size (10/25/50/100)
+
+### Session 2026-01-23 (Dashboard UX Polish)
+- Q: Which navbar layout option best balances visual hierarchy and usability for task-focused users? → A: Logo (left), Add Task (center), Logout (far right) - centered primary action creates visual focus
+- Q: What level of button animation intensity provides the best balance between modern feel and professional productivity focus? → A: Minimal - Hover color change only, no scale/shadow effects
+- Q: How should the table row hover effect be styled to indicate interactivity while maintaining clean aesthetics? → A: Background tint only - Subtle background color change without scale or shadow
+- Q: What modal animation style should be used for TaskFormModal and DeleteConfirmationModal to feel smooth yet professional? → A: Fade only - Simple opacity transition, no movement
+- Q: Should the navbar display any user identification (username/email) or remain completely minimal with only Logo + Action buttons? → A: Completely minimal - No user info displayed, only Logo + Add Task + Logout buttons for maximum clean aesthetic
