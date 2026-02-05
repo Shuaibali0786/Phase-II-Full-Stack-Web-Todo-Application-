@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     """
     Application settings loaded from environment variables
     """
-    # Database
-    DATABASE_URL: str = "sqlite:///./todo_app.db"
+    # Database - Must be PostgreSQL with asyncpg driver
+    DATABASE_URL: str
     SECRET_KEY: str = "your-super-secret-key-change-this-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
 settings = Settings()
