@@ -47,6 +47,8 @@ def create_app() -> FastAPI:
             "http://127.0.0.1:3000",  # Alternative localhost
             "http://localhost:3001",  # Alternative port
             "http://localhost:8080",  # Mobile dev server
+            # Production and preview deployments
+            "https://phase-ii-full-stack-web-todo-application.vercel.app",  # Production (update after deployment)
         ],
         allow_credentials=True,  # Required for cookies/auth headers
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],

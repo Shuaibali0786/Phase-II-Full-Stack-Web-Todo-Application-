@@ -25,7 +25,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchUserData = async () => {
     try {
       const response = await userApi.getProfile();
-      setUser(response.data);
+      // /me returns { user: {...} } — unwrap the nested user object
+      setUser(response.data.user ?? response.data);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Failed to fetch user data:', error);

@@ -34,6 +34,12 @@ const DashboardPage: React.FC = () => {
 
   // Fetch priorities and tags for modals
   const fetchMetadata = useCallback(async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    if (!token) {
+      console.warn('[fetchMetadata] No access_token in localStorage — skipping metadata fetch');
+      return;
+    }
+
     try {
       const [prioritiesRes, tagsRes] = await Promise.all([
         priorityApi.getPriorities(),
@@ -42,8 +48,21 @@ const DashboardPage: React.FC = () => {
 
       setPriorities(prioritiesRes.data || []);
       setTags(tagsRes.data || []);
-    } catch (error) {
-      console.error('Failed to load priorities and tags:', error);
+    } catch (error: any) {
+      // Log full Axios error details so backend validation messages are visible
+      if (error?.response) {
+        console.error(
+          `[fetchMetadata] API error ${error.response.status}:`,
+          JSON.stringify(error.response.data, null, 2)
+        );
+        if (error.response.status === 422) {
+          console.error('[fetchMetadata] 422 Unprocessable Entity — FastAPI validation detail:',
+            error.response.data?.detail ?? error.response.data
+          );
+        }
+      } else {
+        console.error('[fetchMetadata] Network/unknown error:', error);
+      }
     }
   }, []);
 

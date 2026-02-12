@@ -69,11 +69,11 @@ class UpdateTaskRequest(BaseModel):
 
 
 class TaskResponse(BaseModel):
-    id: UUID
+    id: str
     title: str
     description: Optional[str] = None
     is_completed: bool
-    user_id: UUID
+    user_id: str
     due_date: Optional[str] = None
     reminder_time: Optional[str] = None
     created_at: str
@@ -85,6 +85,10 @@ class TaskListResponse(BaseModel):
     total: int
     offset: int
     limit: int
+
+
+class ToggleCompleteRequest(BaseModel):
+    is_completed: bool
 
 
 @router.get("/", response_model=TaskListResponse)
@@ -129,11 +133,11 @@ async def get_tasks(
 
     task_responses = [
         TaskResponse(
-            id=task.id,
+            id=str(task.id),
             title=task.title,
             description=task.description,
             is_completed=task.is_completed,
-            user_id=task.user_id,
+            user_id=str(task.user_id),
             due_date=task.due_date.isoformat() if task.due_date else None,
             reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
             created_at=task.created_at.isoformat(),
@@ -174,11 +178,11 @@ async def create_task(
     task = await TaskService.create_task(session, current_user.id, task_base, task_data.tag_ids)
 
     return TaskResponse(
-        id=task.id,
+        id=str(task.id),
         title=task.title,
         description=task.description,
         is_completed=task.is_completed,
-        user_id=task.user_id,
+        user_id=str(task.user_id),
         due_date=task.due_date.isoformat() if task.due_date else None,
         reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
         created_at=task.created_at.isoformat(),
@@ -203,11 +207,11 @@ async def get_task(
         )
 
     return TaskResponse(
-        id=task.id,
+        id=str(task.id),
         title=task.title,
         description=task.description,
         is_completed=task.is_completed,
-        user_id=task.user_id,
+        user_id=str(task.user_id),
         due_date=task.due_date.isoformat() if task.due_date else None,
         reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
         created_at=task.created_at.isoformat(),
@@ -250,11 +254,42 @@ async def update_task(
         )
 
     return TaskResponse(
-        id=task.id,
+        id=str(task.id),
         title=task.title,
         description=task.description,
         is_completed=task.is_completed,
-        user_id=task.user_id,
+        user_id=str(task.user_id),
+        due_date=task.due_date.isoformat() if task.due_date else None,
+        reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
+        created_at=task.created_at.isoformat(),
+        updated_at=task.updated_at.isoformat()
+    )
+
+
+@router.patch("/{task_id}/complete")
+async def toggle_task_completion(
+    task_id: UUID,
+    body: ToggleCompleteRequest,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Toggle the completion status of a task.
+    Expects JSON body: { "is_completed": true/false }
+    """
+    task = await TaskService.toggle_task_completion(session, task_id, current_user.id, body.is_completed)
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+
+    return TaskResponse(
+        id=str(task.id),
+        title=task.title,
+        description=task.description,
+        is_completed=task.is_completed,
+        user_id=str(task.user_id),
         due_date=task.due_date.isoformat() if task.due_date else None,
         reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
         created_at=task.created_at.isoformat(),
@@ -279,33 +314,3 @@ async def delete_task(
         )
 
     return {"message": "Task deleted successfully"}
-
-
-@router.patch("/{task_id}/complete")
-async def toggle_task_completion(
-    task_id: UUID,
-    is_completed: bool,
-    current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session)
-):
-    """
-    Toggle the completion status of a task
-    """
-    task = await TaskService.toggle_task_completion(session, task_id, current_user.id, is_completed)
-    if not task:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found"
-        )
-
-    return TaskResponse(
-        id=task.id,
-        title=task.title,
-        description=task.description,
-        is_completed=task.is_completed,
-        user_id=task.user_id,
-        due_date=task.due_date.isoformat() if task.due_date else None,
-        reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
-        created_at=task.created_at.isoformat(),
-        updated_at=task.updated_at.isoformat()
-    )

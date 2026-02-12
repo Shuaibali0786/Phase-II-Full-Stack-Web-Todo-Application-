@@ -8,6 +8,7 @@ import { TaskTableProps, SortConfig, SortColumn, PageSize } from './types';
 import TableHeader from './TableHeader';
 import TableRow from './TableRow';
 import PaginationControls from './PaginationControls';
+import { taskApi } from '@/utils/api';
 
 export default function TaskTable({ onAddTask, onEditTask, onDeleteTask, onTaskUpdated, refreshTrigger }: TaskTableProps) {
   // State
@@ -32,35 +33,18 @@ export default function TaskTable({ onAddTask, onEditTask, onDeleteTask, onTaskU
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        setError('Not authenticated');
-        return;
-      }
-
       // Calculate offset from page number
       const offset = (currentPage - 1) * pageSize;
 
-      // Build query params
-      const params = new URLSearchParams({
+      // Use centralized API client
+      const response = await taskApi.getTasks({
         sort: sortConfig.column,
         order: sortConfig.order,
-        limit: pageSize.toString(),
-        offset: offset.toString(),
+        limit: pageSize,
+        offset: offset,
       });
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tasks?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch tasks: ${response.statusText}`);
-      }
-
-      const data: TaskListResponse = await response.json();
+      const data: TaskListResponse = response.data;
       setTasks(data.tasks);
       setTotalTasks(data.total);
     } catch (err) {
@@ -99,23 +83,8 @@ export default function TaskTable({ onAddTask, onEditTask, onDeleteTask, onTaskU
   // Handle toggle complete
   const handleToggleComplete = async (taskId: string, isCompleted: boolean) => {
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) return;
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tasks/${taskId}/complete?is_completed=${isCompleted}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to toggle task completion');
-      }
+      // Use centralized API client
+      await taskApi.toggleTaskComplete(taskId, isCompleted);
 
       // Optimistically update UI
       setTasks((prevTasks) =>
