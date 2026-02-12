@@ -28,12 +28,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Include API routers
+    # Include API routers — static sub-path prefixes MUST come before any
+    # router that has dynamic "/{id}" routes at the same level.
     app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
     app.include_router(users_router, prefix="/api/v1", tags=["users"])
-    app.include_router(tasks_router, prefix="/api/v1", tags=["tasks"])
-    app.include_router(priorities_router, prefix="/api/v1", tags=["priorities"])
-    app.include_router(tags_router, prefix="/api/v1", tags=["tags"])
+    app.include_router(tasks_router, prefix="/api/v1/tasks", tags=["tasks"])
+    app.include_router(priorities_router, prefix="/api/v1/priorities", tags=["priorities"])
+    app.include_router(tags_router, prefix="/api/v1/tags", tags=["tags"])
     app.include_router(ai_chat_router, prefix="/api/v1", tags=["ai"])
     app.include_router(password_reset_router, prefix="/api/v1", tags=["password-reset"])
 

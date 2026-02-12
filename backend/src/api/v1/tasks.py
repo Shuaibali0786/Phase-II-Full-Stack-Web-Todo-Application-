@@ -190,6 +190,37 @@ async def create_task(
     )
 
 
+@router.patch("/{task_id}/complete")
+async def toggle_task_completion(
+    task_id: UUID,
+    body: ToggleCompleteRequest,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Toggle the completion status of a task.
+    Expects JSON body: { "is_completed": true/false }
+    """
+    task = await TaskService.toggle_task_completion(session, task_id, current_user.id, body.is_completed)
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+
+    return TaskResponse(
+        id=str(task.id),
+        title=task.title,
+        description=task.description,
+        is_completed=task.is_completed,
+        user_id=str(task.user_id),
+        due_date=task.due_date.isoformat() if task.due_date else None,
+        reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
+        created_at=task.created_at.isoformat(),
+        updated_at=task.updated_at.isoformat()
+    )
+
+
 @router.get("/{task_id}", response_model=TaskResponse)
 async def get_task(
     task_id: UUID,
@@ -247,37 +278,6 @@ async def update_task(
         update_dict['is_completed'] = task_data.is_completed
 
     task = await TaskService.update_task(session, task_id, current_user.id, update_dict, task_data.tag_ids)
-    if not task:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found"
-        )
-
-    return TaskResponse(
-        id=str(task.id),
-        title=task.title,
-        description=task.description,
-        is_completed=task.is_completed,
-        user_id=str(task.user_id),
-        due_date=task.due_date.isoformat() if task.due_date else None,
-        reminder_time=task.reminder_time.isoformat() if task.reminder_time else None,
-        created_at=task.created_at.isoformat(),
-        updated_at=task.updated_at.isoformat()
-    )
-
-
-@router.patch("/{task_id}/complete")
-async def toggle_task_completion(
-    task_id: UUID,
-    body: ToggleCompleteRequest,
-    current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session)
-):
-    """
-    Toggle the completion status of a task.
-    Expects JSON body: { "is_completed": true/false }
-    """
-    task = await TaskService.toggle_task_completion(session, task_id, current_user.id, body.is_completed)
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
