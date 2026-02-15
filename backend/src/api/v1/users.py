@@ -34,9 +34,12 @@ async def update_current_user_profile(
     """
     Update the profile of the current authenticated user
     """
+    # Normalize email to lowercase (consistent with registration)
+    normalized_email = update_data.email.strip().lower() if update_data.email else None
+
     # Check if email is being changed and if it's already taken by another user
-    if update_data.email and update_data.email != current_user.email:
-        existing_user_statement = select(User).where(User.email == update_data.email)
+    if normalized_email and normalized_email != current_user.email:
+        existing_user_statement = select(User).where(User.email == normalized_email)
         result = await session.exec(existing_user_statement)
         existing_user = result.first()
 
@@ -51,8 +54,8 @@ async def update_current_user_profile(
         current_user.first_name = update_data.first_name
     if update_data.last_name is not None:
         current_user.last_name = update_data.last_name
-    if update_data.email is not None:
-        current_user.email = update_data.email
+    if normalized_email is not None:
+        current_user.email = normalized_email
 
     session.add(current_user)
     await session.commit()
