@@ -6,6 +6,7 @@ from src.api.v1.tasks import router as tasks_router
 from src.api.v1.priorities import router as priorities_router
 from src.api.v1.tags import router as tags_router
 from src.api.v1.ai_chat import router as ai_chat_router
+from src.api.v1.password_reset import router as password_reset_router
 from src.core.database import create_tables, check_connection
 import logging
 
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(priorities_router, prefix="/api/v1/priorities", tags=["priorities"])
     app.include_router(tags_router, prefix="/api/v1/tags", tags=["tags"])
     app.include_router(ai_chat_router, prefix="/api/v1", tags=["ai"])
+    app.include_router(password_reset_router, prefix="/api/v1", tags=["auth"])
 
     @app.on_event("startup")
     async def startup_event():
