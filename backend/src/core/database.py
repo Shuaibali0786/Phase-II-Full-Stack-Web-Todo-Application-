@@ -16,37 +16,48 @@ def get_async_engine() -> AsyncEngine:
 
     IMPORTANT: For PostgreSQL with async support, we must use:
     - postgresql+asyncpg:// protocol (NOT plain postgresql://)
-    - Proper SSL configuration for Neon (in connect_args, NOT URL)
+    - SSL set via connect_args ssl=True (NOT ?sslmode=require in URL)
+    - ?sslmode= must be stripped from the URL; asyncpg rejects it as an unknown kwarg
     """
+    from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
+
     database_url = settings.DATABASE_URL
 
-    # Validate that we're using PostgreSQL with asyncpg
+    # Normalise: accept postgresql:// or postgres:// and rewrite to postgresql+asyncpg://
+    for prefix in ("postgresql://", "postgres://"):
+        if database_url.startswith(prefix):
+            database_url = "postgresql+asyncpg://" + database_url[len(prefix):]
+            break
+
     if not database_url.startswith("postgresql+asyncpg://"):
         raise ValueError(
-            f"DATABASE_URL must use 'postgresql+asyncpg://' driver for async support. "
+            f"DATABASE_URL must use a PostgreSQL driver. "
             f"Current URL starts with: {database_url.split('://')[0]}://"
         )
+
+    # Strip ALL query params from the URL.
+    # asyncpg does not accept psycopg2-style params (sslmode, channel_binding, etc.)
+    # as URL query strings — they must be passed via connect_args instead.
+    # Leaving them in causes: connect() got an unexpected keyword argument 'sslmode'
+    parsed = urlparse(database_url)
+    if parsed.query:
+        database_url = urlunparse(parsed._replace(query=""))
 
     logger.info("Connecting to Neon PostgreSQL with asyncpg driver")
 
     # Create async engine with production-grade configuration
-    # CRITICAL FIX: SSL configured in connect_args (NOT ?sslmode=require in URL)
     engine = create_async_engine(
         database_url,
-        echo=False,  # Set to True for SQL query logging during debugging
+        echo=False,
         future=True,
-        pool_size=20,  # Connection pool size
-        max_overflow=10,  # Additional connections beyond pool_size
-        pool_pre_ping=True,  # Verify connections before using them
-        pool_recycle=3600,  # Recycle connections after 1 hour
+        pool_size=5,        # Conservative: Neon free tier allows 20 total connections
+        max_overflow=5,     # 10 max total connections
+        pool_pre_ping=True,
+        pool_recycle=1800,  # Recycle after 30 min to avoid stale connections
         connect_args={
-            "ssl": "require",  # CRITICAL: SSL for asyncpg (NOT sslmode in URL!)
-            "server_settings": {
-                "application_name": "todo_app",
-                "jit": "off"  # Disable JIT compilation for better connection pool performance
-            },
-            "command_timeout": 60,  # Command timeout in seconds
-            "timeout": 10,  # Connection timeout in seconds
+            "ssl": True,    # asyncpg SSL flag (not sslmode — that's psycopg2)
+            "command_timeout": 60,
+            "timeout": 10,
         }
     )
 
