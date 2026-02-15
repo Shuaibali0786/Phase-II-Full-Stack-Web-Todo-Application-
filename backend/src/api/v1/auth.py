@@ -174,7 +174,7 @@ async def register(register_request: RegisterRequest, session: AsyncSession = De
         await session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again."
+            detail=f"Registration failed: {str(e)}"
         )
 
 
