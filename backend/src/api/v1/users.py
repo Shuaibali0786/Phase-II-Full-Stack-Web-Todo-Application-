@@ -30,7 +30,7 @@ async def update_current_user_profile(
     update_data: UpdateUserRequest,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
-) -> User:
+):
     """
     Update the profile of the current authenticated user
     """
@@ -58,4 +58,14 @@ async def update_current_user_profile(
     await session.commit()
     await session.refresh(current_user)
 
-    return current_user
+    return {
+        "user": {
+            "id": str(current_user.id),
+            "email": current_user.email,
+            "first_name": current_user.first_name,
+            "last_name": current_user.last_name,
+            "is_active": current_user.is_active,
+            "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            "updated_at": current_user.updated_at.isoformat() if current_user.updated_at else None
+        }
+    }
