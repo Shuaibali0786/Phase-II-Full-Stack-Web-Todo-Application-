@@ -31,11 +31,11 @@ export function Card({
   const Component = animated || hoverable ? motion.div : 'div';
 
   const motionProps = animated || hoverable ? {
-    variants: animated ? fadeInUp : undefined,
-    initial: animated ? 'initial' : undefined,
-    animate: animated ? 'animate' : undefined,
+    variants: animated && hoverable ? { ...fadeInUp, ...cardHoverScale } : animated ? fadeInUp : cardHoverScale,
+    initial: animated ? 'initial' : 'rest',
+    animate: animated ? 'animate' : 'rest',
     exit: animated ? 'exit' : undefined,
-    whileHover: hoverable ? cardHoverScale : undefined,
+    whileHover: hoverable ? 'hover' : undefined,
   } : {};
 
   return (

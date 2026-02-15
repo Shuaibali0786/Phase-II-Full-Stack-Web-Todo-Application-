@@ -77,10 +77,10 @@ export function StatCard({
 
   return (
     <motion.div
-      variants={fadeInUp}
+      variants={{ ...fadeInUp, ...cardHoverScale }}
       initial="initial"
       animate="animate"
-      whileHover={cardHoverScale}
+      whileHover="hover"
       transition={{ delay: index * 0.1 }}
       onClick={onClick}
       className={cn(

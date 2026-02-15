@@ -69,11 +69,11 @@ export function TaskCard({
 
   return (
     <motion.div
-      variants={animated ? fadeInUp : undefined}
-      initial={animated ? 'initial' : undefined}
-      animate={animated ? 'animate' : undefined}
+      variants={animated ? { ...fadeInUp, ...cardHoverScale } : cardHoverScale}
+      initial={animated ? 'initial' : 'rest'}
+      animate={animated ? 'animate' : 'rest'}
       exit={animated ? 'exit' : undefined}
-      whileHover={cardHoverScale}
+      whileHover="hover"
       transition={{ delay: index * 0.05 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
