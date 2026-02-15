@@ -17,7 +17,7 @@ class TaskService:
     """
 
     @staticmethod
-    async def create_task(session: AsyncSession, user_id: UUID, task_data: TaskBase, tag_ids: Optional[List[UUID]] = None) -> Task:
+    async def create_task(session: AsyncSession, user_id: UUID, task_data: TaskBase, tag_ids: Optional[List[UUID]] = None, priority_id: Optional[UUID] = None) -> Task:
         """
         Create a new task for a user
         """
@@ -33,7 +33,8 @@ class TaskService:
             description=task_data.description,
             user_id=user_id,
             due_date=task_data.due_date,
-            reminder_time=task_data.reminder_time
+            reminder_time=task_data.reminder_time,
+            priority_id=priority_id
         )
 
         session.add(task)

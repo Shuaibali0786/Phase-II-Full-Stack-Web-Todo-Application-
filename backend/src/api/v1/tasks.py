@@ -175,7 +175,7 @@ async def create_task(
         reminder_time=reminder_time_dt
     )
 
-    task = await TaskService.create_task(session, current_user.id, task_base, task_data.tag_ids)
+    task = await TaskService.create_task(session, current_user.id, task_base, task_data.tag_ids, task_data.priority_id)
 
     return TaskResponse(
         id=str(task.id),
