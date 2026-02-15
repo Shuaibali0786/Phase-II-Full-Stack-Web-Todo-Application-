@@ -30,13 +30,16 @@ async def update_current_user_profile(
     update_data: UpdateUserRequest,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
-) -> User:
+):
     """
     Update the profile of the current authenticated user
     """
+    # Normalize email to lowercase (consistent with registration)
+    normalized_email = update_data.email.strip().lower() if update_data.email else None
+
     # Check if email is being changed and if it's already taken by another user
-    if update_data.email and update_data.email != current_user.email:
-        existing_user_statement = select(User).where(User.email == update_data.email)
+    if normalized_email and normalized_email != current_user.email:
+        existing_user_statement = select(User).where(User.email == normalized_email)
         result = await session.exec(existing_user_statement)
         existing_user = result.first()
 
@@ -51,11 +54,21 @@ async def update_current_user_profile(
         current_user.first_name = update_data.first_name
     if update_data.last_name is not None:
         current_user.last_name = update_data.last_name
-    if update_data.email is not None:
-        current_user.email = update_data.email
+    if normalized_email is not None:
+        current_user.email = normalized_email
 
     session.add(current_user)
     await session.commit()
     await session.refresh(current_user)
 
-    return current_user
+    return {
+        "user": {
+            "id": str(current_user.id),
+            "email": current_user.email,
+            "first_name": current_user.first_name,
+            "last_name": current_user.last_name,
+            "is_active": current_user.is_active,
+            "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            "updated_at": current_user.updated_at.isoformat() if current_user.updated_at else None
+        }
+    }
