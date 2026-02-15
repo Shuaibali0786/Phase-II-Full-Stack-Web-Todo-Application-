@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, AlertCircle, CheckCircle, Circle, Calendar, Flag, ListOrdered, ArrowUpDown } from 'lucide-react';
 import { Task } from '@/types';
 import { format, parseISO } from 'date-fns';
-import apiClient from '@/utils/api';
+import { taskApi } from '@/utils/api';
 
 interface ViewAllTasksModalProps {
   isOpen: boolean;
@@ -36,9 +36,7 @@ export const ViewAllTasksModal: React.FC<ViewAllTasksModalProps> = ({
       }
 
       // Fetch with high limit to get all tasks
-      const response = await apiClient.get('/api/v1/tasks', {
-        params: { limit: 1000, sort: 'created_at', order: 'desc' },
-      });
+      const response = await taskApi.getTasks({ limit: 1000, sort: 'created_at', order: 'desc' });
 
       setTasks(response.data.tasks || []);
     } catch (err) {
